@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Cafe, CafeStatus } from './types';
 import LoginPage from './components/LoginPage';
 import InvitePage from './components/InvitePage';
@@ -17,21 +17,47 @@ const MOCK_CAFE_DATA: Cafe[] = [
 const App: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isMatched, setIsMatched] = useState(false);
+    const [userName, setUserName] = useState('');
     const [cafes, setCafes] = useState<Cafe[]>(MOCK_CAFE_DATA);
     const [activeTab, setActiveTab] = useState<CafeStatus>(CafeStatus.Visited);
     const [selectedCafe, setSelectedCafe] = useState<Cafe | null>(null);
     const [isAddCafeModalOpen, setIsAddCafeModalOpen] = useState(false);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
-    const handleLogin = () => setIsLoggedIn(true);
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    // 위치를 가져올 수 없을 때 기본 위치(서울 시청)로 설정
+                    setUserLocation({ lat: 37.5665, lon: 126.9780 });
+                }
+            );
+        } else {
+             // Geolocation API를 지원하지 않을 경우 기본 위치로 설정
+             setUserLocation({ lat: 37.5665, lon: 126.9780 });
+        }
+    }, []);
+
+    const handleLogin = (name: string) => {
+        setUserName(name);
+        setIsLoggedIn(true);
+    };
     const handleMatch = () => setIsMatched(true);
 
-    const handleAddCafe = (name: string, status: CafeStatus) => {
+    const handleAddCafe = (name: string, status: CafeStatus, lat?: number, lon?: number) => {
         const newCafe: Cafe = {
             id: new Date().toISOString(),
             name,
             status,
-            // For now, new cafes don't have coordinates.
-            // A real app would use a geocoding API.
+            lat,
+            lon,
         };
         setCafes(prev => [newCafe, ...prev]);
         if(status !== CafeStatus.Wishlist) {
@@ -63,6 +89,7 @@ const App: React.FC = () => {
 
     return (
         <MainPage
+            userName={userName}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             cafes={filteredCafes}
@@ -73,8 +100,8 @@ const App: React.FC = () => {
             onUpdateCafe={handleUpdateCafe}
             onDeleteCafe={handleDeleteCafe}
             isAddCafeModalOpen={isAddCafeModalOpen}
-            // FIX: Corrected typo in prop name from 'setIsAddCafe-ModalOpen' to 'setIsAddCafeModalOpen'.
             setIsAddCafeModalOpen={setIsAddCafeModalOpen}
+            userLocation={userLocation}
         />
     );
 };

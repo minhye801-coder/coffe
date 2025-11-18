@@ -24,7 +24,7 @@ const NavButton: React.FC<{
 
 const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
     return (
-        <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <footer className="w-full shrink-0 bg-white border-t border-stone-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <div className="flex justify-around items-center h-20">
                 <NavButton
                     isActive={activeTab === CafeStatus.Wishlist}

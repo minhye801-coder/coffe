@@ -2,6 +2,12 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      ↓↓↓ 혼합 콘텐츠(Mixed Content) 오류 해결을 위한 CSP 메타 태그 추가 ↓↓↓
+      이 태그는 브라우저에게 http:// 로 요청되는 리소스를 https:// 로 자동으로 업그레이드하도록 지시합니다.
+      카카오 지도 SDK 내부에서 발생하는 문제를 해결하는 데 도움이 됩니다.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>커피콕</title>
@@ -9,8 +15,11 @@
     <!-- 
       ↓↓↓ 카카오 지도 API 스크립트 추가 ↓↓↓
       [YOUR_KAKAO_APP_KEY] 부분에 발급받은 본인의 JavaScript 키를 입력해주세요.
+      autoload=false 파라미터를 추가하여 스크립트 로드 후 명시적으로 지도를 초기화합니다.
+      libraries=services 파라미터를 추가하여 장소 검색 기능을 사용할 수 있도록 합니다.
+      '//' 대신 'https://'를 사용하여 혼합 콘텐츠 오류를 방지합니다.
     -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=eda4c36ab3e774746fcaad888e78ed87"></script>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=eda4c36ab3e774746fcaad888e78ed87&libraries=services&autoload=false"></script>
   <script type="importmap">
 {
   "imports": {

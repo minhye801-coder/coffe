@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CoffeeBeanIcon } from './Icons';
 
 interface LoginPageProps {
-    onLogin: () => void;
+    onLogin: (name: string) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+    const [name, setName] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (name.trim()) {
+            onLogin(name.trim());
+        } else {
+            onLogin('우리'); // 이름이 없으면 기본값으로 로그인
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 p-4">
             <div className="w-full max-w-sm text-center">
@@ -15,21 +26,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     <p className="text-amber-700 mt-2"></p>
                 </div>
                 <div className="bg-white p-8 rounded-2xl shadow-lg w-full">
-                    <form onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+                    <form onSubmit={handleSubmit}>
                         <div className="mb-4">
+                            <label htmlFor="username" className="sr-only">이름</label>
                             <input 
-                                type="email" 
-                                placeholder="이메일"
+                                id="username"
+                                type="text" 
+                                placeholder="이름을 입력해주세요"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                                aria-label="이메일"
                             />
                         </div>
                         <div className="mb-6">
+                            <label htmlFor="password" className="sr-only">비밀번호</label>
                             <input 
+                                id="password"
                                 type="password" 
                                 placeholder="비밀번호"
                                 className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                                aria-label="비밀번호"
                             />
                         </div>
                         <div className="mt-8">

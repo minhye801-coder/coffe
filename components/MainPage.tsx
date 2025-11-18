@@ -9,21 +9,24 @@ import { PlusIcon, MapIcon, ListBulletIcon as ListViewIcon } from './Icons';
 
 
 interface MainPageProps {
+    userName: string;
     activeTab: CafeStatus;
     setActiveTab: (tab: CafeStatus) => void;
     cafes: Cafe[]; // Filtered cafes for list view
     allCafes: Cafe[]; // All cafes for map view
     selectedCafe: Cafe | null;
     setSelectedCafe: (cafe: Cafe | null) => void;
-    onAddCafe: (name: string, status: CafeStatus) => void;
+    onAddCafe: (name: string, status: CafeStatus, lat?: number, lon?: number) => void;
     onUpdateCafe: (cafe: Cafe) => void;
     onDeleteCafe: (cafeId: string) => void;
     isAddCafeModalOpen: boolean;
     setIsAddCafeModalOpen: (isOpen: boolean) => void;
+    userLocation: { lat: number; lon: number } | null;
 }
 
 const MainPage: React.FC<MainPageProps> = (props) => {
     const {
+        userName,
         activeTab,
         setActiveTab,
         cafes,
@@ -34,10 +37,11 @@ const MainPage: React.FC<MainPageProps> = (props) => {
         onUpdateCafe,
         onDeleteCafe,
         isAddCafeModalOpen,
-        setIsAddCafeModalOpen
+        setIsAddCafeModalOpen,
+        userLocation
     } = props;
 
-    const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
 
     const tabTitles: Record<CafeStatus, string> = {
         [CafeStatus.Wishlist]: "가고싶은 곳",
@@ -52,23 +56,27 @@ const MainPage: React.FC<MainPageProps> = (props) => {
 
     return (
         <div className="min-h-screen bg-stone-100 font-sans">
-            <div className="max-w-md mx-auto relative pb-28">
-                <header className="p-4 pt-6 text-center sticky top-0 bg-stone-100/80 backdrop-blur-sm z-10 flex justify-between items-center">
+            <div className="max-w-md mx-auto h-screen flex flex-col">
+                <header className="p-4 pt-6 text-center bg-stone-100/80 backdrop-blur-sm z-10 flex justify-between items-center shrink-0">
                     <div className="w-10"></div>
                     <div className="text-center">
                         <h1 className="text-2xl font-bold text-amber-900">{viewMode === 'list' ? tabTitles[activeTab] : "우리의 커피콕 지도"}</h1>
-                        <p className="text-sm text-stone-500">우리의 공유 카페 다이어리</p>
+                        <p className="text-sm text-stone-500">{userName}님과 파트너의 공유 카페 다이어리</p>
                     </div>
                     <button onClick={() => setViewMode(prev => prev === 'list' ? 'map' : 'list')} className="p-2 text-amber-800 rounded-full hover:bg-amber-100 transition-colors">
                         {viewMode === 'list' ? <MapIcon className="h-6 w-6" /> : <ListViewIcon className="h-6 w-6" />}
                     </button>
                 </header>
 
-                <main className="p-4">
+                <main className="flex-grow overflow-hidden">
                     {viewMode === 'list' ? (
-                        <CafeList cafes={cafes} onSelectCafe={setSelectedCafe} />
+                        <div className="h-full overflow-y-auto p-4 pb-20">
+                            <CafeList cafes={cafes} onSelectCafe={setSelectedCafe} />
+                        </div>
                     ) : (
-                        <MapView cafes={allCafes} onSelectCafe={setSelectedCafe} />
+                        <div className="p-4 h-full">
+                            <MapView cafes={allCafes} onSelectCafe={setSelectedCafe} userLocation={userLocation} />
+                        </div>
                     )}
                 </main>
 
@@ -96,6 +104,7 @@ const MainPage: React.FC<MainPageProps> = (props) => {
                 <AddCafeModal 
                     onClose={() => setIsAddCafeModalOpen(false)}
                     onAdd={onAddCafe}
+                    userLocation={userLocation}
                 />
             )}
         </div>
