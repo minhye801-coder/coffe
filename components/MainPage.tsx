@@ -6,6 +6,7 @@ import CafeDetailModal from './CafeDetailModal';
 import AddCafeModal from './AddCafeModal';
 import MapView from './MapView';
 import { PlusIcon, MapIcon, ListBulletIcon as ListViewIcon } from './Icons';
+import KakaoConfigWarning from './KakaoConfigWarning';
 
 
 interface MainPageProps {
@@ -22,6 +23,9 @@ interface MainPageProps {
     isAddCafeModalOpen: boolean;
     setIsAddCafeModalOpen: (isOpen: boolean) => void;
     userLocation: { lat: number; lon: number } | null;
+    kakaoConfigStatus: 'checking' | 'success' | 'error';
+    isKakaoWarningVisible: boolean;
+    setIsKakaoWarningVisible: (isVisible: boolean) => void;
 }
 
 const MainPage: React.FC<MainPageProps> = (props) => {
@@ -38,7 +42,10 @@ const MainPage: React.FC<MainPageProps> = (props) => {
         onDeleteCafe,
         isAddCafeModalOpen,
         setIsAddCafeModalOpen,
-        userLocation
+        userLocation,
+        kakaoConfigStatus,
+        isKakaoWarningVisible,
+        setIsKakaoWarningVisible
     } = props;
 
     const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
@@ -56,6 +63,10 @@ const MainPage: React.FC<MainPageProps> = (props) => {
 
     return (
         <div className="min-h-screen bg-stone-100 font-sans">
+             {kakaoConfigStatus === 'error' && isKakaoWarningVisible && (
+                <KakaoConfigWarning onClose={() => setIsKakaoWarningVisible(false)} />
+            )}
+
             <div className="max-w-md mx-auto h-screen flex flex-col">
                 <header className="p-4 pt-6 text-center bg-stone-100/80 backdrop-blur-sm z-10 flex justify-between items-center shrink-0">
                     <div className="w-10"></div>

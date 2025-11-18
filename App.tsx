@@ -23,6 +23,9 @@ const App: React.FC = () => {
     const [selectedCafe, setSelectedCafe] = useState<Cafe | null>(null);
     const [isAddCafeModalOpen, setIsAddCafeModalOpen] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+    
+    const [kakaoConfigStatus, setKakaoConfigStatus] = useState<'checking' | 'success' | 'error'>('checking');
+    const [isKakaoWarningVisible, setIsKakaoWarningVisible] = useState(true);
 
     useEffect(() => {
         if (navigator.geolocation) {
@@ -42,6 +45,46 @@ const App: React.FC = () => {
         } else {
              // Geolocation API를 지원하지 않을 경우 기본 위치로 설정
              setUserLocation({ lat: 37.5665, lon: 126.9780 });
+        }
+    }, []);
+
+    // Kakao setup check logic
+    useEffect(() => {
+        const performCheck = () => {
+            if (typeof window.kakao === 'undefined' || typeof window.kakao.maps === 'undefined' || typeof window.kakao.maps.services === 'undefined') {
+                console.error("Kakao Maps script or services failed to load.");
+                setKakaoConfigStatus('error');
+                return;
+            }
+
+            const places = new window.kakao.maps.services.Places();
+            
+            // A simple search to check if the API key and domain are correctly configured.
+            places.keywordSearch('판교역', (data, status) => {
+                if (status === window.kakao.maps.services.Status.OK || status === window.kakao.maps.services.Status.ZERO_RESULT) {
+                    setKakaoConfigStatus('success');
+                } else {
+                    // status is likely ERROR, which means domain is not registered
+                    console.error("Kakao services check failed with status:", status);
+                    setKakaoConfigStatus('error');
+                }
+            });
+        };
+        
+        // Ensure kakao.maps.load is available and use it to run the check
+        if (window.kakao && window.kakao.maps && window.kakao.maps.load) {
+            window.kakao.maps.load(performCheck);
+        } else {
+            // Fallback if the script hasn't loaded at all, try after a short delay
+            const timeoutId = setTimeout(() => {
+                if (window.kakao && window.kakao.maps && window.kakao.maps.load) {
+                     window.kakao.maps.load(performCheck);
+                } else {
+                    console.error("Kakao Maps script not found.");
+                    setKakaoConfigStatus('error');
+                }
+            }, 1000);
+            return () => clearTimeout(timeoutId);
         }
     }, []);
 
@@ -102,6 +145,9 @@ const App: React.FC = () => {
             isAddCafeModalOpen={isAddCafeModalOpen}
             setIsAddCafeModalOpen={setIsAddCafeModalOpen}
             userLocation={userLocation}
+            kakaoConfigStatus={kakaoConfigStatus}
+            isKakaoWarningVisible={isKakaoWarningVisible}
+            setIsKakaoWarningVisible={setIsKakaoWarningVisible}
         />
     );
 };
